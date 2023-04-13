@@ -54,7 +54,7 @@ impl UnsafeListNode {
         unsafe { &mut (*(self.next)) }
     }
 
-    pub fn set_next(&mut self, next: &mut UnsafeListNode) {
+    pub fn set_next(&mut self, next: *mut UnsafeListNode) {
         (*self).next = next;
     }
 
@@ -73,6 +73,30 @@ impl UnsafeListNode {
                 }
             }
             println!("{}", (*cur).val);
+        }
+    }
+
+    pub fn get_first_with_val(&mut self, val: i32) -> Option<&mut UnsafeListNode> {
+        let mut cur = self;
+        unsafe {
+            while !(*cur).next.is_null() {
+                if (*cur).val == val {
+                    return Some(&mut *cur);
+                }
+                cur = &mut *(*cur).next;
+            }
+            if (*cur).val == val {
+                return Some(&mut *cur);
+            }
+        }
+        None
+    }
+
+    pub fn to_next(&mut self) {
+        let next = (*self).next;
+        if !next.is_null() {
+            let next = unsafe { Box::from_raw(next) };
+            *self = *next;
         }
     }
 }

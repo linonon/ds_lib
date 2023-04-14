@@ -135,25 +135,28 @@ fn test_unsafe_list_node() {
 
 #[allow(dead_code)]
 #[derive(Clone, Debug)]
-pub struct Node {
-    pub val: i32,
-    pub next: Option<Rc<RefCell<Node>>>,
+pub struct Node<T> {
+    pub val: T,
+    pub next: Option<Rc<RefCell<Node<T>>>>,
 }
 
-pub struct ListNode {
-    pub node: Option<Rc<RefCell<Node>>>,
+pub struct ListNode<T> {
+    pub node: Option<Rc<RefCell<Node<T>>>>,
 }
 
-impl ListNode {
-    pub fn new(val: i32) -> ListNode {
+impl<T> ListNode<T>
+where
+    T: std::cmp::PartialEq + std::fmt::Debug + Copy,
+{
+    pub fn new(val: T) -> ListNode<T> {
         ListNode {
             node: Some(Rc::new(RefCell::new(Node { val, next: None }))),
         }
     }
 
-    pub fn from(vals: Vec<i32>) -> ListNode {
+    pub fn from(vals: Vec<T>) -> Option<ListNode<T>> {
         if vals.len() == 0 {
-            return ListNode::new(0);
+            return None;
         }
 
         let mut head = ListNode::new(vals[0]);
@@ -162,10 +165,10 @@ impl ListNode {
             head.insert(vals[i]);
         }
 
-        head
+        Some(head)
     }
 
-    pub fn insert(&mut self, val: i32) {
+    pub fn insert(&mut self, val: T) {
         let mut cur = self.node.as_ref().unwrap().clone();
         while cur.borrow().next.is_some() {
             let tmp = cur.borrow().next.as_ref().unwrap().clone();
@@ -175,7 +178,7 @@ impl ListNode {
     }
 
     /// get the next node
-    pub fn next(&self) -> Option<Rc<RefCell<Node>>> {
+    pub fn next(&self) -> Option<Rc<RefCell<Node<T>>>> {
         self.node.as_ref().unwrap().borrow().next.clone()
     }
 
@@ -188,7 +191,7 @@ impl ListNode {
     }
 
     // get the next node
-    pub fn get_next(&mut self) -> Option<ListNode> {
+    pub fn get_next(&mut self) -> Option<ListNode<T>> {
         let node = self.node.as_ref().unwrap().borrow_mut();
         if node.next.is_none() {
             return None;
@@ -198,7 +201,7 @@ impl ListNode {
         Some(ListNode { node: Some(next) })
     }
 
-    pub fn get_first_node_with_value(&mut self, val: i32) -> Option<ListNode> {
+    pub fn get_first_node_with_value(&mut self, val: T) -> Option<ListNode<T>> {
         let mut cur = self.node.as_ref().unwrap().clone();
         while cur.borrow().next.is_some() {
             if cur.borrow().val == val {
@@ -214,7 +217,7 @@ impl ListNode {
     }
 
     // set the next node
-    pub fn set_next(&mut self, next: Option<Rc<RefCell<Node>>>) {
+    pub fn set_next(&mut self, next: Option<Rc<RefCell<Node<T>>>>) {
         let mut head = self.node.as_ref().unwrap().borrow_mut();
         head.next = next;
     }
@@ -232,7 +235,7 @@ impl ListNode {
         const MAX: usize = 10;
         let mut s = String::new();
         while cur.borrow().next.is_some() {
-            s.push_str(&format!("{} -> ", cur.borrow().val));
+            s.push_str(&format!("{:?} -> ", cur.borrow().val));
             let tmp = cur.borrow().next.as_ref().unwrap().clone();
             cur = tmp;
 
@@ -241,7 +244,7 @@ impl ListNode {
                 break;
             }
         }
-        s.push_str(&format!("{}", cur.borrow().val));
+        s.push_str(&format!("{:?}", cur.borrow().val));
         s
     }
 
@@ -261,7 +264,7 @@ impl ListNode {
 
 #[test]
 fn test_list_node() {
-    let mut n = ListNode::from(vec![1, 2, 3, 4, 5, 6, 7]);
+    let mut n = ListNode::from(vec![1, 2, 3, 4, 5, 6, 7]).unwrap();
     println!("{}", n.stringify());
 
     let mut n2 = n.get_next().unwrap();

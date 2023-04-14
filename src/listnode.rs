@@ -182,7 +182,7 @@ where
             cur.go_next();
         }
 
-        cur.set_next(Some(ListNode::new(val)));
+        cur.set_next(ListNode::new(val));
     }
 
     /// get the next node
@@ -238,11 +238,11 @@ where
         None
     }
 
-    // set the next node
-    pub fn set_next(&mut self, n: Option<ListNode<T>>) {
+    // set the next node, can be None
+    pub fn set_next(&mut self, n: ListNode<T>) {
         let mut head = self.node.as_ref().unwrap().borrow_mut();
-        match n {
-            Some(n) => head.next = Some(n.node.as_ref().unwrap().clone()),
+        match n.node {
+            Some(node) => head.next = Some(node.clone()),
             None => head.next = None,
         }
     }

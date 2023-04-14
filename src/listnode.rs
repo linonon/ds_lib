@@ -152,6 +152,12 @@ impl<T> Clone for ListNode<T> {
     }
 }
 
+impl<T> Default for ListNode<T> {
+    fn default() -> Self {
+        Self { node: None }
+    }
+}
+
 impl<T> ListNode<T>
 where
     T: std::cmp::PartialEq + std::fmt::Debug + Copy,
@@ -162,9 +168,14 @@ where
         }
     }
 
-    pub fn from(vals: Vec<T>) -> Option<ListNode<T>> {
+    // return ListNode{node: None}
+    pub fn none() -> ListNode<T> {
+        ListNode::default()
+    }
+
+    pub fn from(vals: Vec<T>) -> ListNode<T> {
         if vals.len() == 0 {
-            return None;
+            return ListNode::none();
         }
 
         let mut head = ListNode::new(vals[0]);
@@ -173,7 +184,7 @@ where
             head.insert(vals[i]);
         }
 
-        Some(head)
+        head
     }
 
     pub fn insert(&mut self, val: T) {
@@ -240,10 +251,12 @@ where
 
     // set the next node, can be None
     pub fn set_next(&mut self, n: ListNode<T>) {
-        let mut head = self.node.as_ref().unwrap().borrow_mut();
-        match n.node {
-            Some(node) => head.next = Some(node.clone()),
-            None => head.next = None,
+        let node = self.node.clone();
+        match node {
+            Some(node) => {
+                node.clone().borrow_mut().next = n.node;
+            }
+            None => {}
         }
     }
 

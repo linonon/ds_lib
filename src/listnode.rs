@@ -134,7 +134,7 @@ fn test_unsafe_list_node() {
 }
 
 #[allow(dead_code)]
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct Node<T> {
     pub val: T,
     pub next: Option<Rc<RefCell<Node<T>>>>,
@@ -142,6 +142,14 @@ pub struct Node<T> {
 
 pub struct ListNode<T> {
     pub node: Option<Rc<RefCell<Node<T>>>>,
+}
+
+impl<T> Clone for ListNode<T> {
+    fn clone(&self) -> Self {
+        Self {
+            node: self.node.clone(),
+        }
+    }
 }
 
 impl<T> ListNode<T>
@@ -169,24 +177,38 @@ where
     }
 
     pub fn insert(&mut self, val: T) {
-        let mut cur = self.node.as_ref().unwrap().clone();
-        while cur.borrow().next.is_some() {
-            let tmp = cur.borrow().next.as_ref().unwrap().clone();
-            cur = tmp;
+        let mut cur = self.clone();
+        while cur.next().is_some() {
+            cur.go_next();
         }
-        cur.borrow_mut().next = Some(Rc::new(RefCell::new(Node { val, next: None })));
+
+        cur.set_next(Some(ListNode::new(val)));
     }
 
     /// get the next node
-    pub fn next(&self) -> Option<Rc<RefCell<Node<T>>>> {
-        self.node.as_ref().unwrap().borrow().next.clone()
+    pub fn next(&mut self) -> Option<ListNode<T>> {
+        let node = self.node.clone();
+        match node {
+            Some(n) => {
+                let next = n.borrow().next.clone();
+                match next {
+                    Some(n) => Some(ListNode { node: Some(n) }),
+                    None => None,
+                }
+            }
+            None => None,
+        }
     }
 
     /// equal to `p = p.next`
-    pub fn to_next(&mut self) {
-        let next = self.node.as_ref().unwrap().borrow().next.clone();
-        if next.is_some() {
-            self.node = next;
+    pub fn go_next(&mut self) {
+        let node = self.node.clone();
+        match node {
+            Some(n) => {
+                let next = n.borrow().next.clone();
+                self.node = next;
+            }
+            None => {}
         }
     }
 
@@ -217,9 +239,23 @@ where
     }
 
     // set the next node
-    pub fn set_next(&mut self, next: Option<Rc<RefCell<Node<T>>>>) {
+    pub fn set_next(&mut self, n: Option<ListNode<T>>) {
         let mut head = self.node.as_ref().unwrap().borrow_mut();
-        head.next = next;
+        match n {
+            Some(n) => head.next = Some(n.node.as_ref().unwrap().clone()),
+            None => head.next = None,
+        }
+    }
+
+    pub fn val(&self) -> T {
+        let node = self.node.clone().unwrap();
+        let node = node.borrow();
+        node.val
+    }
+
+    pub fn set_val(&mut self, val: T) {
+        let mut head = self.node.as_ref().unwrap().borrow_mut();
+        head.val = val;
     }
 
     /// print the listnode elements.
@@ -230,31 +266,30 @@ where
     /// Sum the listnode elements in a string.  
     /// To advoid the infinite loop, show max 10 elements.
     pub fn stringify(&self) -> String {
-        let mut cur = self.node.as_ref().unwrap().clone();
-        let mut max = 0;
+        let mut cur = self.clone();
+        let mut n = 0;
         const MAX: usize = 10;
         let mut s = String::new();
-        while cur.borrow().next.is_some() {
-            s.push_str(&format!("{:?} -> ", cur.borrow().val));
-            let tmp = cur.borrow().next.as_ref().unwrap().clone();
-            cur = tmp;
 
-            max += 1;
-            if max > MAX {
+        while cur.next().is_some() {
+            s.push_str(&format!("{:?} -> ", cur.val()));
+
+            cur.go_next();
+            n += 1;
+            if n > MAX {
                 break;
             }
         }
-        s.push_str(&format!("{:?}", cur.borrow().val));
+        s.push_str(&format!("{:?}", cur.val()));
         s
     }
 
     pub fn len(&self) -> usize {
         let mut n = 0;
-        let mut cur = self.node.as_ref().unwrap().clone();
+        let mut cur = self.clone();
 
-        while cur.borrow().next.is_some() {
-            let tmp = cur.borrow().next.as_ref().unwrap().clone();
-            cur = tmp;
+        while cur.node.is_some() {
+            cur.go_next();
             n += 1;
         }
 
@@ -271,7 +306,7 @@ fn test_list_node() {
     // 2 -> 3 -> 4 -> 5 -> 6 -> 7
     println!("{}", n2.stringify());
 
-    n2.to_next();
+    n2.go_next();
     // 3 -> 4 -> 5 -> 6 -> 7
     println!("{}", n2.stringify());
 

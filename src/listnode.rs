@@ -1,4 +1,4 @@
-use std::{cell::RefCell, ptr, rc::Rc};
+use std::{cell::RefCell, cmp::PartialEq, fmt::Debug, ptr, rc::Rc};
 
 #[allow(dead_code)]
 pub struct UnsafeListNode {
@@ -160,7 +160,7 @@ impl<T> Default for ListNode<T> {
 
 impl<T> PartialEq for ListNode<T>
 where
-    T: std::cmp::PartialEq,
+    T: PartialEq,
 {
     fn eq(&self, other: &Self) -> bool {
         if self.node.is_none() && other.node.is_none() {
@@ -176,12 +176,20 @@ where
 
 impl<T> ListNode<T>
 where
-    T: std::cmp::PartialEq + std::fmt::Debug + Copy,
+    T: PartialEq + Debug + Copy,
 {
     pub fn new(val: T) -> ListNode<T> {
         ListNode {
             node: Some(Rc::new(RefCell::new(Node { val, next: None }))),
         }
+    }
+
+    pub fn is_none(&self) -> bool {
+        self.node.is_none()
+    }
+
+    pub fn is_some(&self) -> bool {
+        self.node.is_some()
     }
 
     // return ListNode{node: None}
@@ -213,17 +221,17 @@ where
     }
 
     /// get the next node
-    pub fn next(&mut self) -> Option<ListNode<T>> {
+    pub fn next(&mut self) -> ListNode<T> {
         let node = self.node.clone();
-        match node {
-            Some(n) => {
-                let next = n.borrow().next.clone();
-                match next {
-                    Some(n) => Some(ListNode { node: Some(n) }),
-                    None => None,
-                }
-            }
-            None => None,
+        let n = match node {
+            Some(n) => n,
+            None => return ListNode::default(),
+        };
+
+        let next = n.borrow().next.clone();
+        match next {
+            Some(n) => ListNode { node: Some(n) },
+            None => ListNode::default(),
         }
     }
 
@@ -240,14 +248,18 @@ where
     }
 
     // get the next node
-    pub fn get_next(&mut self) -> Option<ListNode<T>> {
-        let node = self.node.as_ref().unwrap().borrow_mut();
-        if node.next.is_none() {
-            return None;
-        }
+    pub fn get_next(&mut self) -> ListNode<T> {
+        let node = match &self.node {
+            Some(n) => n.borrow(),
+            None => return ListNode::default(),
+        };
 
-        let next = node.next.as_ref().unwrap().clone();
-        Some(ListNode { node: Some(next) })
+        match node.next {
+            Some(ref next) => ListNode {
+                node: Some(next.clone()),
+            },
+            None => ListNode::default(),
+        }
     }
 
     pub fn get_first_node_with_value(&mut self, val: T) -> Option<ListNode<T>> {

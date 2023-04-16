@@ -357,10 +357,10 @@ where
 
 #[test]
 fn test_list_node() {
-    let mut n = ListNode::from(vec![1, 2, 3, 4, 5, 6, 7]).unwrap();
+    let mut n = ListNode::from(vec![1, 2, 3, 4, 5, 6, 7]);
     println!("{}", n.stringify());
 
-    let mut n2 = n.get_next().unwrap();
+    let mut n2 = n.next();
     // 2 -> 3 -> 4 -> 5 -> 6 -> 7
     println!("{}", n2.stringify());
 
@@ -368,8 +368,8 @@ fn test_list_node() {
     // 3 -> 4 -> 5 -> 6 -> 7
     println!("{}", n2.stringify());
 
-    let mut n3 = n.get_first_node_with_value(5).unwrap();
-    n3.set_next(n.node.clone());
+    let mut n3 = n.find_first_node_with_value(5).unwrap();
+    n3.set_next(n.clone());
 
     n3.show();
 }

@@ -158,6 +158,22 @@ impl<T> Default for ListNode<T> {
     }
 }
 
+impl<T> PartialEq for ListNode<T>
+where
+    T: std::cmp::PartialEq,
+{
+    fn eq(&self, other: &Self) -> bool {
+        if self.node.is_none() && other.node.is_none() {
+            return true;
+        }
+
+        let a = self.node.as_ref().unwrap();
+        let b = other.node.as_ref().unwrap();
+
+        Rc::ptr_eq(a, b)
+    }
+}
+
 impl<T> ListNode<T>
 where
     T: std::cmp::PartialEq + std::fmt::Debug + Copy,

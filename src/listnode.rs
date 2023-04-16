@@ -235,6 +235,17 @@ where
         }
     }
 
+    // set the next node, can be None
+    pub fn set_next(&mut self, n: ListNode<T>) {
+        let node = self.node.clone();
+        match node {
+            Some(node) => {
+                node.clone().borrow_mut().next = n.node;
+            }
+            None => {}
+        }
+    }
+
     /// equal to `p = p.next`
     pub fn go_next(&mut self) {
         let node = self.node.clone();
@@ -247,45 +258,29 @@ where
         }
     }
 
-    // get the next node
-    pub fn get_next(&mut self) -> ListNode<T> {
-        let node = match &self.node {
-            Some(n) => n.borrow(),
-            None => return ListNode::default(),
-        };
-
-        match node.next {
-            Some(ref next) => ListNode {
-                node: Some(next.clone()),
-            },
-            None => ListNode::default(),
-        }
-    }
-
-    pub fn get_first_node_with_value(&mut self, val: T) -> Option<ListNode<T>> {
-        let mut cur = self.node.as_ref().unwrap().clone();
-        while cur.borrow().next.is_some() {
-            if cur.borrow().val == val {
-                return Some(ListNode { node: Some(cur) });
+    /// Both `find` and `get` can be used to describe the purpose of a function in this case,
+    /// but there are subtle semantic differences between them. Here are the differences:
+    ///
+    /// `Get` is often used to retrieve a known element from a data structure.
+    /// In many cases, when using "get", developers expect to always be able to find the requested element.
+    /// If the element cannot be found, an exception or error is usually thrown.
+    ///
+    /// `Find` emphasizes searching for a specific element in a data structure, which may or may not exist.
+    /// When using "find", developers are often more willing to accept the fact that the function may not be able to find the requested element.
+    /// Typically, the "find" function returns an Option type (such as in Rust) so that it can represent both the case where the element is found and where it is not found.
+    pub fn find_first_node_with_value(&mut self, val: T) -> Option<ListNode<T>> {
+        let mut cur = self.clone();
+        while cur.next().is_some() {
+            if cur.val() == val {
+                return Some(cur);
             }
-            let tmp = cur.borrow().next.as_ref().unwrap().clone();
-            cur = tmp;
+            cur.go_next();
         }
-        if cur.borrow().val == val {
-            return Some(ListNode { node: Some(cur) });
+        if cur.val() == val {
+            return Some(cur);
         }
+
         None
-    }
-
-    // set the next node, can be None
-    pub fn set_next(&mut self, n: ListNode<T>) {
-        let node = self.node.clone();
-        match node {
-            Some(node) => {
-                node.clone().borrow_mut().next = n.node;
-            }
-            None => {}
-        }
     }
 
     pub fn val(&self) -> T {
@@ -299,13 +294,24 @@ where
         head.val = val;
     }
 
-    /// print the listnode elements.
+    /// print the `ListNode` elements.
     pub fn show(&self) {
         println!("{}", self.stringify());
     }
 
-    /// Sum the listnode elements in a string.  
-    /// To advoid the infinite loop, show max 10 elements.
+    /// Returns a string representation of a `ListNode` with a maximum of 10 elements.
+    ///
+    /// This function creates a string that contains the values of the `ListNode` elements, separated by a "->" arrow.
+    /// To prevent infinite loops in case of circular references, the function limits the representation to a maximum
+    /// of 10 elements. If the list has more than 10 elements, the output will be truncated.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use data_structures::listnode::ListNode;
+    /// let mut list = ListNode::from(vec![1,2,3]));
+    /// assert_eq!(list.stringify(), "3 -> 2 -> 1");
+    /// ```
     pub fn stringify(&self) -> String {
         let mut cur = self.clone();
         let mut n = 0;
@@ -325,6 +331,17 @@ where
         s
     }
 
+    /// Returns the length of the `ListNode`.
+    ///
+    /// This function calculates the number of elements in the `ListNode` by traversing the list.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use data_structures::listnode::ListNode;
+    /// let mut list = ListNode::from(vec![1,2,3]);
+    /// assert_eq!(list.len(), 3);   
+    /// ```
     pub fn len(&self) -> usize {
         let mut n = 0;
         let mut cur = self.clone();

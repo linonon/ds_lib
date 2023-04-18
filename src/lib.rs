@@ -1,4 +1,5 @@
 pub mod listnode;
+pub mod queue;
 
 pub fn add(left: usize, right: usize) -> usize {
     left + right

@@ -10,7 +10,7 @@ impl<T> Stack<T>
 where
     T: Copy + std::fmt::Debug,
 {
-    fn new(size: usize) -> Stack<T> {
+    pub fn new(size: usize) -> Stack<T> {
         Stack {
             size,
             top: -1,
@@ -18,22 +18,22 @@ where
         }
     }
 
-    fn empty(&self) -> bool {
+    pub fn empty(&self) -> bool {
         self.top == -1
     }
 
-    fn top(&self) -> &T {
+    pub fn top(&self) -> &T {
         if self.empty() {
             panic!("Stack underflow");
         }
         &self.data[self.top as usize]
     }
 
-    fn full(&self) -> bool {
+    pub fn full(&self) -> bool {
         self.top == self.size as i64 - 1
     }
 
-    fn push(&mut self, value: T) {
+    pub fn push(&mut self, value: T) {
         if self.full() {
             panic!("Stack overflow");
         }
@@ -41,7 +41,7 @@ where
         self.data.push(value);
     }
 
-    fn pop(&mut self) -> T {
+    pub fn pop(&mut self) -> T {
         if self.empty() {
             panic!("Stack underflow");
         }

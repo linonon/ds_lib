@@ -1,5 +1,5 @@
 #[allow(unused)]
-struct Stack<T> {
+pub struct Stack<T> {
     size: usize,
     top: i64,
     data: Vec<T>,

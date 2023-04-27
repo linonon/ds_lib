@@ -8,6 +8,7 @@ struct CircleQueue<T> {
     count: usize,
 }
 
+#[allow(dead_code)]
 impl<T> CircleQueue<T>
 where
     T: Clone + Copy + Debug + PartialEq,
@@ -77,11 +78,14 @@ where
 #[test]
 fn test_queue() {
     let mut q = CircleQueue::new(3);
-    q.enqueue(1);
-    q.enqueue(2);
-    q.dequeue();
-    q.enqueue(3);
-    q.enqueue(4);
+
+    q.enqueue(1).unwrap();
+    q.enqueue(2).unwrap();
+
+    q.dequeue().unwrap();
+
+    q.enqueue(3).unwrap();
+    q.enqueue(4).unwrap();
 
     q.show();
 }

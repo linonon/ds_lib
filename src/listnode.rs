@@ -308,9 +308,9 @@ where
     /// # Examples
     ///
     /// ```
-    /// use data_structures::listnode::ListNode;
-    /// let mut list = ListNode::from(vec![1,2,3]));
-    /// assert_eq!(list.stringify(), "3 -> 2 -> 1");
+    /// use ds_lib::listnode::ListNode;
+    /// let mut list = ListNode::from(vec![1,2,3]);
+    /// assert_eq!(list.stringify(), "1 -> 2 -> 3");
     /// ```
     pub fn stringify(&self) -> String {
         let mut cur = self.clone();
@@ -338,7 +338,7 @@ where
     /// # Examples
     ///
     /// ```
-    /// use data_structures::listnode::ListNode;
+    /// use ds_lib::listnode::ListNode;
     /// let mut list = ListNode::from(vec![1,2,3]);
     /// assert_eq!(list.len(), 3);   
     /// ```
